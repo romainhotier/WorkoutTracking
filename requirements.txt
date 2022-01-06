@@ -1,0 +1,12 @@
+Flask
+pymongo
+requests
+pytest
+jsonschema
+flask-bcrypt
+flask-jwt-extended
+flask-pymongo
+pyopenssl
+waitress
+flask-cors
+pydantic
