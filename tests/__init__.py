@@ -6,6 +6,7 @@ from flaskr import Error
 from flaskr.enum import Msg, ErrorMsg
 
 from tests.test_workshop import WorkshopTest
+from flaskr.workshop.model import WorkshopType
 
 
 class Server(pydantic.BaseModel):

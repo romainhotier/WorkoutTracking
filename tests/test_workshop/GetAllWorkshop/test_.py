@@ -1,7 +1,7 @@
 import unittest
 import requests
 
-from tests import Server, WorkshopTest
+from tests import Server, WorkshopTest, WorkshopType
 from tests.test_workshop.GetAllWorkshop import GetAllWorkshop, GetAllWorkshopRepBody
 
 
@@ -31,9 +31,63 @@ class TestGetAllWorkshop(unittest.TestCase):
         self.assertIn(GetAllWorkshopRepBody.data_expected(tc_workshop1), response_body.data)
         self.assertIn(GetAllWorkshopRepBody.data_expected(tc_workshop2), response_body.data)
         self.assertNotIn("detail", response_body)
-        """ check bdd"""
-        tc_workshop1.check_exist_by_id()
-        tc_workshop2.check_exist_by_id()
+
+    def test_api_ok_with_args(self):
+        """ With args.
+
+        Return
+            200 - All Workshop.
+        """
+        """ env """
+        tc_workshop1 = WorkshopTest(name="qaRHR_name1", category=WorkshopType.list()).insert()
+        tc_workshop2 = WorkshopTest(name="qaRHR_name2", category=[WorkshopType.Fitness.value]).insert()
+        """ call api """
+        url = f'{Server.main_url}/{GetAllWorkshop.url}?{GetAllWorkshop.param_category}={WorkshopType.Cardio.value}'
+        response = requests.get(url, verify=False)
+        response_body = GetAllWorkshopRepBody(**response.json())
+        """ assert """
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers["Content-Type"], "application/json")
+        self.assertEqual(response_body.status, 200)
+        self.assertEqual(response_body.msg, GetAllWorkshop.msg_success)
+        self.assertIn(GetAllWorkshopRepBody.data_expected(tc_workshop1), response_body.data)
+        self.assertNotIn(GetAllWorkshopRepBody.data_expected(tc_workshop2), response_body.data)
+        self.assertNotIn("detail", response_body)
+
+    def test_api_ok_with_args_complex(self):
+        """ With args.
+
+        Return
+            200 - All Workshop.
+        """
+        """ env """
+        tc_workshop1 = WorkshopTest(name="qaRHR_name1", description="desc1", category=WorkshopType.list()).insert()
+        tc_workshop2 = WorkshopTest(name="qaRHR_name2", description="desc2",
+                                    category=[WorkshopType.Fitness.value]).insert()
+        tc_workshop3 = WorkshopTest(name="qaRHR_name3", description="desc2",
+                                    category=WorkshopType.list()).insert()
+        tc_workshop4 = WorkshopTest(name="qaRHR_name4", description="desc1",
+                                    category=[WorkshopType.Fitness.value, WorkshopType.Cardio.value]).insert()
+        """ call api """
+        url = f'{Server.main_url}/{GetAllWorkshop.url}?' \
+              f'{GetAllWorkshop.param_name}=qaRHR&' \
+              f'{GetAllWorkshop.param_name}=name&' \
+              f'{GetAllWorkshop.param_description}=desc&' \
+              f'{GetAllWorkshop.param_description}=1&' \
+              f'{GetAllWorkshop.param_category}={WorkshopType.Strength.value}&' \
+              f'{GetAllWorkshop.param_category}={WorkshopType.Cardio.value}'
+        response = requests.get(url, verify=False)
+        response_body = GetAllWorkshopRepBody(**response.json())
+        """ assert """
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers["Content-Type"], "application/json")
+        self.assertEqual(response_body.status, 200)
+        self.assertEqual(response_body.msg, GetAllWorkshop.msg_success)
+        self.assertIn(GetAllWorkshopRepBody.data_expected(tc_workshop1), response_body.data)
+        self.assertNotIn(GetAllWorkshopRepBody.data_expected(tc_workshop2), response_body.data)
+        self.assertIn(GetAllWorkshopRepBody.data_expected(tc_workshop3), response_body.data)
+        self.assertNotIn(GetAllWorkshopRepBody.data_expected(tc_workshop4), response_body.data)
+        self.assertNotIn("detail", response_body)
 
     @classmethod
     def tearDownClass(cls):

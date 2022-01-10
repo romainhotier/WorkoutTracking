@@ -13,10 +13,17 @@ class WorkshopTest(Workshop):
         self.id = str(ObjectId())
         self.name = "qaRHR_workshopName"
         self.description = "Workshop's description"
-        self.type = []
+        self.category = []
         self.media = []
         for k, v in kwargs.items():
-            self.__setattr__(k, v)
+            try:
+                self.__setattr__(k, v)
+            except ValueError:
+                pass
+
+    def set_id(self, _id):
+        self.id = _id
+        return self
 
     def insert(self):
         """ Insert a WorkshopTest and return it. """
@@ -37,6 +44,10 @@ class WorkshopTest(Workshop):
     def check_doesnt_exist_by_id(self):
         """ Check a WorkshopTest doesn't exist by _id. """
         assert mongo.db.workshop.find_one({"_id": ObjectId(self.id)}) is None
+
+    def check_doesnt_exist_by_name(self):
+        """ Check a WorkshopTest doesn't exist by name. """
+        assert mongo.db.workshop.find_one({"name": self.name}) is None
 
     @staticmethod
     def count():

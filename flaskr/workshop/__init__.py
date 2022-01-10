@@ -1,2 +1,2 @@
 """ Workshop Model """
-from flaskr.workshop.model import Workshop
+from flaskr.workshop.model import Workshop, WorkshopType

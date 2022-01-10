@@ -1,4 +1,6 @@
 """ PostWorkshop API """
+import copy
+
 import pydantic
 from typing import Optional
 
@@ -9,8 +11,18 @@ class PostWorkshop(object):
     url = "workshop"
     param_name = "name"
     param_description = "description"
+    param_category = "category"
     msg_success = f'workoutTracking.workshop.postWorkshop.{Msg.Success.value}'
     msg_badRequest = f'workoutTracking.workshop.{Msg.BadRequest.value}'
+
+    @staticmethod
+    def workshop_set_from_body(body):
+        data = copy.deepcopy(body)
+        if "_id" in data:
+            data.pop("_id")
+        if "media" in data:
+            data.pop("media")
+        return WorkshopTest(**data)
 
 
 class PostWorkshopRepBody(pydantic.BaseModel):

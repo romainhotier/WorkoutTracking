@@ -113,7 +113,7 @@ class Response(pydantic.BaseModel):
 
     def format(self):
         """ Remove None data/detail. """
-        return {k: v for k, v in self.dict().items() if v}
+        return {k: v for k, v in self.dict().items() if v is not None}
 
     def sent(self):
         """ Return a Flask's Response """

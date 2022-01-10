@@ -18,3 +18,5 @@ class ErrorMsg(Enum):
     MustBeAnObjectId = "Must be an ObjectId"
     MustBeAString = "Must be a String"
     MustBeAStringNotEmpty = "Must be a String not empty"
+    MustBeAList = "Must be a List"
+    MustBeInWorkShopCategory = "Must be in ['cardio', 'fitness', 'strength']"

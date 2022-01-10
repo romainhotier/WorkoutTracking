@@ -91,19 +91,19 @@ class TestPostWorkshop(unittest.TestCase):
         """ name is a string.
 
         Return
-            200 - Workshop Created.
+            201 - Workshop Created.
         """
         """ env """
-        body = {PostWorkshop.param_name: "invalid"}
+        body = {PostWorkshop.param_name: "qaRHR_invalid"}
         """ call api """
         url = f'{Server.main_url}/{PostWorkshop.url}'
         response = requests.post(url, json=body, verify=False)
         response_body = PostWorkshopRepBody(**response.json())
-        tc_workshop = WorkshopTest(id=response_body.get_id(), **body)
+        tc_workshop: WorkshopTest = PostWorkshop().workshop_set_from_body(body).set_id(response_body.get_id())
         """ assert """
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 201)
         self.assertEqual(response.headers["Content-Type"], "application/json")
-        self.assertEqual(response_body.status, 200)
+        self.assertEqual(response_body.status, 201)
         self.assertEqual(response_body.msg, PostWorkshop.msg_success)
         self.assertEqual(response_body.data, PostWorkshopRepBody.data_expected(tc_workshop))
         self.assertNotIn("detail", response_body)

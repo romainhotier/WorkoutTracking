@@ -7,7 +7,11 @@ from tests import WorkshopTest, Msg, Error
 
 class GetAllWorkshop(object):
     url = "workshop"
+    param_name = "name"
+    param_description = "description"
+    param_category = "category"
     msg_success = f'workoutTracking.workshop.getAllWorkshop.{Msg.Success.value}'
+    msg_badRequest = f'workoutTracking.workshop.{Msg.BadRequest.value}'
 
 
 class GetAllWorkshopRepBody(pydantic.BaseModel):
@@ -20,3 +24,7 @@ class GetAllWorkshopRepBody(pydantic.BaseModel):
     @staticmethod
     def data_expected(workshop):
         return workshop.dict()
+
+    @staticmethod
+    def detail_expected(**error):
+        return Error(**error)

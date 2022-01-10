@@ -2,6 +2,8 @@
 import pydantic
 from typing import Optional
 
+import re
+from enum import Enum
 from bson import ObjectId
 from flask import abort
 
@@ -10,21 +12,32 @@ from flaskr.database import mongo
 from flaskr.enum import ErrorMsg
 
 
+class WorkshopType(Enum):
+    """ Workshop's type """
+    Strength = "strength"
+    Cardio = "cardio"
+    Fitness = "fitness"
+
+    @classmethod
+    def list(cls):
+        return list(map(lambda c: c.value, cls))
+
+
 class Workshop(pydantic.BaseModel):
     """ Workshop Information.
 
     - id: ObjectId = Workshop's ObjectId in MongoDb.
-    - name: str = Workshop's Name. (Unique)
+    - name: str = Workshop's Name.
     - description: str = Workshop's description.
-    - type = list[str] Workshop's type.
+    - category = list[str] Workshop's category in ['cardio', 'fitness', 'strength'].
     - media = list[str] Workshop's media.
     """
 
     id: Optional[object] = pydantic.Field(alias='_id')
     name: Optional[object] = None
     description: Optional[object] = "Workshop's description"
-    type: Optional[list[object]] = []
-    media: Optional[list[object]] = []
+    category: Optional[object] = []
+    media: Optional[object] = []
 
     @pydantic.validator("id")
     @classmethod
@@ -58,9 +71,6 @@ class Workshop(pydantic.BaseModel):
     @classmethod
     def description_validator(cls, value):
         """ Description must be a non empty String. """
-        if value is None:
-            return abort(status=400,
-                         description=flaskr.Error(param="description", value=value, msg=ErrorMsg.IsRequired.value))
         if not isinstance(value, str):
             return abort(status=400,
                          description=flaskr.Error(param="description", value=value, msg=ErrorMsg.MustBeAString.value))
@@ -69,6 +79,36 @@ class Workshop(pydantic.BaseModel):
                          description=flaskr.Error(param="description", value=value,
                                                   msg=ErrorMsg.MustBeAStringNotEmpty.value))
         return value
+
+    @pydantic.validator("category")
+    @classmethod
+    def category_validator(cls, value):
+        """ Type must be a WorkshopType enum. """
+        if not isinstance(value, list):
+            return abort(status=400,
+                         description=flaskr.Error(param="category", value=value, msg=ErrorMsg.MustBeAList.value))
+        for key in value:
+            if key not in WorkshopType.list():
+                return abort(status=400,
+                             description=flaskr.Error(param="category", value=value,
+                                                      msg=ErrorMsg.MustBeInWorkShopCategory.value))
+        return value
+
+    @pydantic.validator("media")
+    @classmethod
+    def media_validator(cls, value):
+        """ Media can't be edited through the model. """
+        if not isinstance(value, list):
+            return []
+        return value
+
+    def insert(self):
+        """ Insert a Workshop and return it. """
+        data = self.dict()
+        data.pop("id")
+        query = mongo.db.workshop.insert_one(data)
+        self.id = str(query.inserted_id)
+        return self
 
     @staticmethod
     def select_all():
@@ -79,20 +119,27 @@ class Workshop(pydantic.BaseModel):
         return workshops
 
     @staticmethod
-    def insert(data):
-        """ Insert a Workshop and return it.
+    def select_all_by(args):
+        """ Return all Workshops. """
+        search = {}
+        workshops: list[Workshop] = []
+        for key, values in args.items():
+            if key in ["name", "description"]:
+                search[key] = {"$in": [re.compile('.*{0}.*'.format(value), re.IGNORECASE) for value in values]}
+            elif key == "category":
+                search["$expr"] = {"$setIsSubset": [values, "$category"]}
+                pass
+        for item in mongo.db.workshop.find(search):
+            workshops.append(Workshop(**item))
+        return workshops
 
-        - name is mandatory.
-        """
-        if "name" not in data.keys():
-            return abort(status=400, description=flaskr.Error(param="name", msg=ErrorMsg.IsRequired.value))
-        try:
-            data.pop("_id")
-        finally:
-            workshop = Workshop(**data)
-            query = mongo.db.workshop.insert_one(workshop.dict(exclude_none=True))
-            workshop.id = str(query.inserted_id)
-            return workshop
+    def select_one_by_id(self):
+        """ Return a Workshop. """
+        item = mongo.db.workshop.find_one({"_id": ObjectId(self.id)})
+        if item is None:
+            return abort(status=404,
+                         description=flaskr.Error(param="_id", msg=ErrorMsg.DoesntExist.value, value=self.id))
+        return Workshop(**item)
 
     def delete(self):
         """ Delete a Workshop and return it. """

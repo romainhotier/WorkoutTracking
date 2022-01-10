@@ -1,0 +1,42 @@
+Workshop
+- id
+- name:str
+- description:str
+- media:list
+- type:enum
+
+Set
+- id
+- Exercise:object
+- repetition:int
+- weight:int
+- executionTime:int
+- restTime:int
+
+Exercise
+- id
+- sets: list(Set)
+
+Workout
+- id
+- name
+- type:enum
+- exercises: list(Workout)
+
+
+@dataclass
+class Workshop:
+    _id: str = field(default=None)
+    name: str = field(default=None)
+    description: str = field(default="Workshop's description")
+    type: list[str] = field(default_factory=list)
+    media: list[str] = field(default_factory=list)
+
+    def custom(self, data):
+        for k, v in data.items():
+            match k:
+                case "_id":
+                    self.__setattr__(k, str(v))
+                case _:
+                    self.__setattr__(k, v)
+        return self
