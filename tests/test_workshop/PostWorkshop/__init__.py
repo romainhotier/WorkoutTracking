@@ -11,7 +11,7 @@ class PostWorkshop(object):
     url = "workshop"
     param_name = "name"
     param_description = "description"
-    param_category = "category"
+    param_categories = "categories"
     msg_success = f'workoutTracking.workshop.postWorkshop.{Msg.Success.value}'
     msg_badRequest = f'workoutTracking.workshop.{Msg.BadRequest.value}'
 
@@ -20,8 +20,8 @@ class PostWorkshop(object):
         data = copy.deepcopy(body)
         if "_id" in data:
             data.pop("_id")
-        if "media" in data:
-            data.pop("media")
+        if "files" in data:
+            data.pop("files")
         return WorkshopTest(**data)
 
 

@@ -1,7 +1,7 @@
 import unittest
 import requests
 
-from tests import Server, WorkshopTest, WorkshopType, ErrorMsg
+from tests import Server, WorkshopTest, WorkshopCategories, ErrorMsg
 from tests.test_workshop.GetAllWorkshop import GetAllWorkshop, GetAllWorkshopRepBody
 
 
@@ -39,10 +39,10 @@ class TestGetAllWorkshop(unittest.TestCase):
             200 - All Workshop.
         """
         """ env """
-        WorkshopTest(name="qaRHR_name1", category=WorkshopType.list()).insert()
-        WorkshopTest(name="qaRHR_name2", category=[WorkshopType.Fitness.value]).insert()
+        WorkshopTest(name="qaRHR_name1", categories=WorkshopCategories.list()).insert()
+        WorkshopTest(name="qaRHR_name2", categories=[WorkshopCategories.Fitness.value]).insert()
         """ call api """
-        url = f'{Server.main_url}/{GetAllWorkshop.url}?{GetAllWorkshop.param_category}='
+        url = f'{Server.main_url}/{GetAllWorkshop.url}?{GetAllWorkshop.param_categories}='
         response = requests.get(url, verify=False)
         response_body = GetAllWorkshopRepBody(**response.json())
         """ assert """
@@ -52,7 +52,7 @@ class TestGetAllWorkshop(unittest.TestCase):
         self.assertEqual(response_body.msg, GetAllWorkshop.msg_badRequest)
         self.assertNotIn("data", response_body)
         self.assertEqual(response_body.detail,
-                         GetAllWorkshopRepBody.detail_expected(param=GetAllWorkshop.param_category,
+                         GetAllWorkshopRepBody.detail_expected(param=GetAllWorkshop.param_categories,
                                                                msg=ErrorMsg.MustBeInWorkShopCategory.value,
                                                                value=[""]))
 
@@ -63,10 +63,11 @@ class TestGetAllWorkshop(unittest.TestCase):
             200 - All Workshop.
         """
         """ env """
-        tc_workshop1 = WorkshopTest(name="qaRHR_name1", category=WorkshopType.list()).insert()
-        tc_workshop2 = WorkshopTest(name="qaRHR_name2", category=[WorkshopType.Fitness.value]).insert()
+        tc_workshop1 = WorkshopTest(name="qaRHR_name1", categories=WorkshopCategories.list()).insert()
+        tc_workshop2 = WorkshopTest(name="qaRHR_name2", categories=[WorkshopCategories.Fitness.value]).insert()
         """ call api """
-        url = f'{Server.main_url}/{GetAllWorkshop.url}?{GetAllWorkshop.param_category}={WorkshopType.Cardio.value}'
+        url = f'{Server.main_url}/{GetAllWorkshop.url}?' \
+              f'{GetAllWorkshop.param_categories}={WorkshopCategories.Cardio.value}'
         response = requests.get(url, verify=False)
         response_body = GetAllWorkshopRepBody(**response.json())
         """ assert """
@@ -85,16 +86,16 @@ class TestGetAllWorkshop(unittest.TestCase):
             200 - All Workshop.
         """
         """ env """
-        tc_workshop1 = WorkshopTest(name="qaRHR_name1", category=WorkshopType.list()).insert()
-        tc_workshop2 = WorkshopTest(name="qaRHR_name2", category=[WorkshopType.Fitness.value]).insert()
-        tc_workshop3 = WorkshopTest(name="qaRHR_name3", category=[WorkshopType.Cardio.value,
-                                                                  WorkshopType.Strength.value]).insert()
-        tc_workshop4 = WorkshopTest(name="qaRHR_name3", category=[WorkshopType.Fitness.value,
-                                                                  WorkshopType.Cardio.value]).insert()
+        tc_workshop1 = WorkshopTest(name="qaRHR_name1", categories=WorkshopCategories.list()).insert()
+        tc_workshop2 = WorkshopTest(name="qaRHR_name2", categories=[WorkshopCategories.Fitness.value]).insert()
+        tc_workshop3 = WorkshopTest(name="qaRHR_name3", categories=[WorkshopCategories.Cardio.value,
+                                                                    WorkshopCategories.Strength.value]).insert()
+        tc_workshop4 = WorkshopTest(name="qaRHR_name3", categories=[WorkshopCategories.Fitness.value,
+                                                                    WorkshopCategories.Cardio.value]).insert()
         """ call api """
         url = f'{Server.main_url}/{GetAllWorkshop.url}?' \
-              f'{GetAllWorkshop.param_category}={WorkshopType.Cardio.value}&' \
-              f'{GetAllWorkshop.param_category}={WorkshopType.Fitness.value}'
+              f'{GetAllWorkshop.param_categories}={WorkshopCategories.Cardio.value}&' \
+              f'{GetAllWorkshop.param_categories}={WorkshopCategories.Fitness.value}'
         response = requests.get(url, verify=False)
         response_body = GetAllWorkshopRepBody(**response.json())
         """ assert """

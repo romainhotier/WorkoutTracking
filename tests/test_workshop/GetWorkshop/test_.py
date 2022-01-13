@@ -22,7 +22,7 @@ class TestGetWorkshop(unittest.TestCase):
         tc_id = tc_workshop1.id
         """ call api """
         url = f'{Server.main_url}/{GetWorkshop.url}/{tc_id}'
-        response = requests.delete(url, verify=False)
+        response = requests.get(url, verify=False)
         response_body = GetWorkshopRepBody(**response.json())
         """ assert """
         self.assertEqual(response.status_code, 200)

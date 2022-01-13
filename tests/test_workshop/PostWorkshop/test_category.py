@@ -1,7 +1,7 @@
 import unittest
 import requests
 
-from tests import Server, WorkshopTest, WorkshopType, ErrorMsg
+from tests import Server, WorkshopTest, WorkshopCategories, ErrorMsg
 from tests.test_workshop.PostWorkshop import PostWorkshop, PostWorkshopRepBody
 
 
@@ -42,7 +42,7 @@ class TestPostWorkshop(unittest.TestCase):
         """ env """
         count_before = WorkshopTest().count()
         body = {PostWorkshop.param_name: "qaRHR_workshopName",
-                PostWorkshop.param_category: None}
+                PostWorkshop.param_categories: None}
         """ call api """
         url = f'{Server.main_url}/{PostWorkshop.url}'
         response = requests.post(url, json=body, verify=False)
@@ -54,9 +54,9 @@ class TestPostWorkshop(unittest.TestCase):
         self.assertEqual(response_body.msg, PostWorkshop.msg_badRequest)
         self.assertNotIn("data", response_body)
         self.assertEqual(response_body.detail,
-                         PostWorkshopRepBody.detail_expected(param=PostWorkshop.param_category,
+                         PostWorkshopRepBody.detail_expected(param=PostWorkshop.param_categories,
                                                              msg=ErrorMsg.MustBeAList.value,
-                                                             value=body[PostWorkshop.param_category]))
+                                                             value=body[PostWorkshop.param_categories]))
         """ check bdd"""
         self.assertEqual(count_before, WorkshopTest().count())
 
@@ -69,7 +69,7 @@ class TestPostWorkshop(unittest.TestCase):
         """ env """
         count_before = WorkshopTest().count()
         body = {PostWorkshop.param_name: "qaRHR_workshopName",
-                PostWorkshop.param_category: ""}
+                PostWorkshop.param_categories: ""}
         """ call api """
         url = f'{Server.main_url}/{PostWorkshop.url}'
         response = requests.post(url, json=body, verify=False)
@@ -81,9 +81,9 @@ class TestPostWorkshop(unittest.TestCase):
         self.assertEqual(response_body.msg, PostWorkshop.msg_badRequest)
         self.assertNotIn("data", response_body)
         self.assertEqual(response_body.detail,
-                         PostWorkshopRepBody.detail_expected(param=PostWorkshop.param_category,
+                         PostWorkshopRepBody.detail_expected(param=PostWorkshop.param_categories,
                                                              msg=ErrorMsg.MustBeAList.value,
-                                                             value=body[PostWorkshop.param_category]))
+                                                             value=body[PostWorkshop.param_categories]))
         """ check bdd"""
         self.assertEqual(count_before, WorkshopTest().count())
 
@@ -96,7 +96,7 @@ class TestPostWorkshop(unittest.TestCase):
         """ env """
         count_before = WorkshopTest().count()
         body = {PostWorkshop.param_name: "qaRHR_workshopName",
-                PostWorkshop.param_category: "invalid"}
+                PostWorkshop.param_categories: "invalid"}
         """ call api """
         url = f'{Server.main_url}/{PostWorkshop.url}'
         response = requests.post(url, json=body, verify=False)
@@ -108,9 +108,9 @@ class TestPostWorkshop(unittest.TestCase):
         self.assertEqual(response_body.msg, PostWorkshop.msg_badRequest)
         self.assertNotIn("data", response_body)
         self.assertEqual(response_body.detail,
-                         PostWorkshopRepBody.detail_expected(param=PostWorkshop.param_category,
+                         PostWorkshopRepBody.detail_expected(param=PostWorkshop.param_categories,
                                                              msg=ErrorMsg.MustBeAList.value,
-                                                             value=body[PostWorkshop.param_category]))
+                                                             value=body[PostWorkshop.param_categories]))
         """ check bdd"""
         self.assertEqual(count_before, WorkshopTest().count())
 
@@ -122,7 +122,7 @@ class TestPostWorkshop(unittest.TestCase):
         """
         """ env """
         body = {PostWorkshop.param_name: "qaRHR_workshopName",
-                PostWorkshop.param_category: []}
+                PostWorkshop.param_categories: []}
         """ call api """
         url = f'{Server.main_url}/{PostWorkshop.url}'
         response = requests.post(url, json=body, verify=False)
@@ -147,7 +147,7 @@ class TestPostWorkshop(unittest.TestCase):
         """ env """
         count_before = WorkshopTest().count()
         body = {PostWorkshop.param_name: "qaRHR_workshopName",
-                PostWorkshop.param_category: ["invalid", WorkshopType.Cardio.value]}
+                PostWorkshop.param_categories: ["invalid", WorkshopCategories.Cardio.value]}
         """ call api """
         url = f'{Server.main_url}/{PostWorkshop.url}'
         response = requests.post(url, json=body, verify=False)
@@ -159,9 +159,9 @@ class TestPostWorkshop(unittest.TestCase):
         self.assertEqual(response_body.msg, PostWorkshop.msg_badRequest)
         self.assertNotIn("data", response_body)
         self.assertEqual(response_body.detail,
-                         PostWorkshopRepBody.detail_expected(param=PostWorkshop.param_category,
-                                                             msg=ErrorMsg.MustBeInWorkShopType.value,
-                                                             value=body[PostWorkshop.param_category]))
+                         PostWorkshopRepBody.detail_expected(param=PostWorkshop.param_categories,
+                                                             msg=ErrorMsg.MustBeInWorkshopCategories.value,
+                                                             value=body[PostWorkshop.param_categories]))
         """ check bdd"""
         self.assertEqual(count_before, WorkshopTest().count())
 
@@ -173,7 +173,7 @@ class TestPostWorkshop(unittest.TestCase):
         """
         """ env """
         body = {PostWorkshop.param_name: "qaRHR_workshopName",
-                PostWorkshop.param_category: WorkshopType.list()}
+                PostWorkshop.param_categories: WorkshopCategories.list()}
         """ call api """
         url = f'{Server.main_url}/{PostWorkshop.url}'
         response = requests.post(url, json=body, verify=False)
@@ -198,7 +198,7 @@ class TestPostWorkshop(unittest.TestCase):
         """ env """
         count_before = WorkshopTest().count()
         body = {PostWorkshop.param_name: "qaRHR_workshopName",
-                PostWorkshop.param_category: {}}
+                PostWorkshop.param_categories: {}}
         """ call api """
         url = f'{Server.main_url}/{PostWorkshop.url}'
         response = requests.post(url, json=body, verify=False)
@@ -210,9 +210,9 @@ class TestPostWorkshop(unittest.TestCase):
         self.assertEqual(response_body.msg, PostWorkshop.msg_badRequest)
         self.assertNotIn("data", response_body)
         self.assertEqual(response_body.detail,
-                         PostWorkshopRepBody.detail_expected(param=PostWorkshop.param_category,
+                         PostWorkshopRepBody.detail_expected(param=PostWorkshop.param_categories,
                                                              msg=ErrorMsg.MustBeAList.value,
-                                                             value=body[PostWorkshop.param_category]))
+                                                             value=body[PostWorkshop.param_categories]))
         """ check bdd"""
         self.assertEqual(count_before, WorkshopTest().count())
 

@@ -3,6 +3,7 @@ import requests
 
 from tests import Server, WorkshopTest, ErrorMsg
 from tests.test_workshop.GetWorkshop import GetWorkshop, GetWorkshopRepBody
+from tests.test_workshop.GetAllWorkshop import GetAllWorkshop, GetAllWorkshopRepBody
 
 
 class TestGetWorkshop(unittest.TestCase):
@@ -17,20 +18,21 @@ class TestGetWorkshop(unittest.TestCase):
             405 - Method not Allowed.
         """
         """ env """
-        WorkshopTest(name="qaRHR_name1").insert()
-        WorkshopTest(name="qaRHR_name2").insert()
+        tc_workshop1 = WorkshopTest(name="qaRHR_name1").insert()
+        tc_workshop2 = WorkshopTest(name="qaRHR_name2").insert()
         tc_id = ""
         """ call api """
         url = f'{Server.main_url}/{GetWorkshop.url}/{tc_id}'
-        response = requests.delete(url, verify=False)
-        response_body = GetWorkshopRepBody(**response.json())
+        response = requests.get(url, verify=False)
+        response_body = GetAllWorkshopRepBody(**response.json())
         """ assert """
-        self.assertEqual(response.status_code, 405)
+        self.assertEqual(response.status_code, 200)
         self.assertEqual(response.headers["Content-Type"], "application/json")
-        self.assertEqual(response_body.status, 405)
-        self.assertEqual(response_body.msg, GetWorkshop.msg_notAllowed)
-        self.assertNotIn("data", response_body)
-        self.assertEqual(response_body.detail, ErrorMsg.MethodIsNotAllowed.value)
+        self.assertEqual(response_body.status, 200)
+        self.assertEqual(response_body.msg, GetAllWorkshop.msg_success)
+        self.assertIn(GetAllWorkshopRepBody.data_expected(tc_workshop1), response_body.data)
+        self.assertIn(GetAllWorkshopRepBody.data_expected(tc_workshop2), response_body.data)
+        self.assertNotIn("detail", response_body)
 
     def test_id_string_invalid(self):
         """ _id is an invalid string.
@@ -44,7 +46,7 @@ class TestGetWorkshop(unittest.TestCase):
         tc_id = "invalid"
         """ call api """
         url = f'{Server.main_url}/{GetWorkshop.url}/{tc_id}'
-        response = requests.delete(url, verify=False)
+        response = requests.get(url, verify=False)
         response_body = GetWorkshopRepBody(**response.json())
         """ assert """
         self.assertEqual(response.status_code, 400)
@@ -69,7 +71,7 @@ class TestGetWorkshop(unittest.TestCase):
         tc_id = "aaaaaaaaaaaaaaaaaaaaaaaa"
         """ call api """
         url = f'{Server.main_url}/{GetWorkshop.url}/{tc_id}'
-        response = requests.delete(url, verify=False)
+        response = requests.get(url, verify=False)
         response_body = GetWorkshopRepBody(**response.json())
         """ assert """
         self.assertEqual(response.status_code, 404)

@@ -8,7 +8,7 @@ from tests import WorkshopTest, Msg, Error
 class GetWorkshop(object):
     url = "workshop"
     param_id = "_id"
-    msg_success = f'workoutTracking.workshop.deleteWorkshop.{Msg.Success.value}'
+    msg_success = f'workoutTracking.workshop.getWorkshop.{Msg.Success.value}'
     msg_badRequest = f'workoutTracking.workshop.{Msg.BadRequest.value}'
     msg_notFound = f'workoutTracking.workshop.{Msg.NotFound.value}'
     msg_notAllowed = f'workoutTracking.{Msg.NotAllowed.value}'

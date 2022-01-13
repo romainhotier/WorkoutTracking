@@ -13,8 +13,8 @@ class WorkshopTest(Workshop):
         self.id = str(ObjectId())
         self.name = "qaRHR_workshopName"
         self.description = "Workshop's description"
-        self.category = []
-        self.media = []
+        self.categories = []
+        self.files = []
         for k, v in kwargs.items():
             try:
                 self.__setattr__(k, v)
@@ -23,6 +23,18 @@ class WorkshopTest(Workshop):
 
     def set_id(self, _id):
         self.id = _id
+        return self
+
+    def update(self, **kwargs):
+        for k, v in kwargs.items():
+            try:
+                self.__setattr__(k, v)
+            except ValueError:
+                pass
+        return self
+
+    def add_files(self, files: list):
+        self.files = self.files + [f'workshop/{self.id}/{file.name}' for file in files]
         return self
 
     def insert(self):

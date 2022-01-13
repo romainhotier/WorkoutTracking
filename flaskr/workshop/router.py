@@ -1,9 +1,10 @@
 """ Workshop routes """
-from flask import Blueprint, request, abort
+from flask import Blueprint, request
 
 import flaskr
-from flaskr.enum import Msg, ErrorMsg
-from flaskr.workshop import Workshop, WorkshopType
+from flaskr.enum import Msg
+from flaskr.workshop import Workshop, DeleteWorkshopValidator, GetAllWorkshopValidator, GetWorkshopValidator, \
+    PostWorkshopValidator, PostWorkshopFilesValidator
 
 apis = Blueprint('workshop', __name__, url_prefix='/workshop')
 
@@ -17,8 +18,8 @@ def get_all_workshop():
 
     @apiParam (Query param) {String} [name] Workshop's name ($OR in search)
     @apiParam (Query param) {String} [description] Workshop's description ($OR in search)
-    @apiParam (Query param) {String} [category] Workshop's category in ['cardio', 'fitness', 'strength']
-                                                ($AND in search)
+    @apiParam (Query param) {String} [categories] Workshop's categories in ['cardio', 'fitness', 'strength']
+                                                  ($AND in search)
 
     @apiExample {json} Example usage:
     GET http://127.0.0.1:5000/ingredient
@@ -29,20 +30,17 @@ def get_all_workshop():
         "status": 200,
         "msg": "workoutTracking.workshop.deleteWorkshop.success",
         "data": [{"description": "Workshop's description", "id": "61dc2a02dc8493a5f471d2fe",
-                  "media": [], "name": "qaRHR_name1", "category": []},
+                  "files": [], "name": "qaRHR_name1", "categories": []},
                   {"description": "Workshop's description", "id": "61dc2a02dc8493a5f471d2ff",
-                  "media": [], "name": "qaRHR_name2", "category": []}]
+                  "files": [], "name": "qaRHR_name2", "categories": []}]
     }
     """
     args = request.args.to_dict(flat=False)
     if not args:
         workshops: list[Workshop] = Workshop().select_all()
     else:
-        if ("category" in args) and (not set(args["category"]).issubset(WorkshopType.list())):
-            return abort(status=400, description=flaskr.Error(param="category",
-                                                              msg=ErrorMsg.MustBeInWorkShopCategory.value,
-                                                              value=args["category"]))
-        workshops: list[Workshop] = Workshop().select_all_by(args)
+        args_validated = GetAllWorkshopValidator(**args).dict(exclude_none=True)
+        workshops: list[Workshop] = Workshop().select_all_by(args_validated)
     return flaskr.Response(status=200, msg=f'workoutTracking.{apis.name}.getAllWorkshop.{Msg.Success.value}',
                            data=workshops, detail=None).sent()
 
@@ -65,7 +63,7 @@ def get_workshop(_id):
         "status": 200,
         "msg": "workoutTracking.workshop.deleteWorkshop.success",
         "data": {"description": "Workshop's description", "id": "61dc2a02dc8493a5f471d2fe",
-                  "media": [], "name": "qaRHR_name1", "category": []}
+                 "files": [], "name": "qaRHR_name1", "categories": []}
     }
 
     @apiErrorExample {json} Error response:
@@ -76,6 +74,7 @@ def get_workshop(_id):
         "detail": {"msg": "Doesn't exist", "param": "_id","value": "aaaaaaaaaaaaaaaaaaaaaaaa"}
     }
     """
+    GetWorkshopValidator(_id=_id)
     workshop: Workshop = Workshop(_id=_id).select_one_by_id()
     return flaskr.Response(status=200, msg=f'workoutTracking.{apis.name}.getWorkshop.{Msg.Success.value}',
                            data=workshop, detail=None).sent()
@@ -90,7 +89,7 @@ def post_workshop():
 
     @apiParam (Body param) {String} name Workshop's name
     @apiParam (Body param) {String} [description="Workshop's description"] Workshop's description
-    @apiParam (Body param) {Array} [category=Empty_Array] Workshop's category in ['cardio', 'fitness', 'strength']
+    @apiParam (Body param) {Array} [categories=Empty_Array] Workshop's categories in ['cardio', 'fitness', 'strength']
 
     @apiExample {json} Example usage:
     POST http://127.0.0.1:5000/workshop
@@ -105,8 +104,8 @@ def post_workshop():
     {
         "status": 201,
         "msg": "workoutTracking.workshop.postWorkshop.success",
-        "data": {"category": ["cardio"], "description": "qaRHR_description", "id": "61dc31e09aa1edbdfe1e5aa7",
-                 "media": [], "name": "qaRHR_name"}
+        "data": {"categories": ["cardio"], "description": "qaRHR_description", "id": "61dc31e09aa1edbdfe1e5aa7",
+                 "files": [], "name": "qaRHR_name"}
     }
 
     @apiErrorExample {json} Error response:
@@ -118,15 +117,55 @@ def post_workshop():
     }
     """
     data = request.json
-    if "name" not in data:
-        return abort(status=400, description=flaskr.Error(param="name", msg=ErrorMsg.IsRequired.value))
-    if "_id" in data:
-        data.pop("_id")
-    if "media" in data:
-        data.pop("media")
-    workshop: Workshop = Workshop(**data).insert()
+    PostWorkshopValidator().check_mandatory_fields(data)
+    data_validated = PostWorkshopValidator(**data).dict()
+    workshop: Workshop = Workshop(**data_validated).insert()
     return flaskr.Response(status=201, msg=f'workoutTracking.{apis.name}.postWorkshop.{Msg.Success.value}',
                            data=workshop, detail=None).sent()
+
+
+@apis.route('/<_id>/files', methods=['POST'])
+def post_workshop_files(_id):
+    """
+    @api {post} /workshop/<_id>/files  PostWorkshopFiles
+    @apiGroup Workshop
+    @apiDescription Add files to a workshop
+
+    @apiParam (Body param) {String} name Workshop's name
+    @apiParam (Body param) {String} [description="Workshop's description"] Workshop's description
+    @apiParam (Body param) {Array} [categories=Empty_Array] Workshop's categories in ['cardio', 'fitness', 'strength']
+
+    @apiExample {json} Example usage:
+    POST http://127.0.0.1:5000/workshop/<_id>/files
+    files = [('files', open('pathToFile1', 'rb')),
+             ('files', open('pathToFile2', 'rb'))]
+
+    @apiSuccessExample {json} Success response:
+    HTTPS 201
+    {
+        "status": 201,
+        "msg": "workoutTracking.workshop.postWorkshopFiles.success",
+        "data": {"categories": ["cardio"], "description": "qaRHR_description", "id": "61dc31e09aa1edbdfe1e5aa7",
+                 "files": ["<files1Path>", "<files2Path>"], "name": "qaRHR_name"}
+    }
+
+    @apiErrorExample {json} Error response:
+    HTTPS 400
+    {
+        "status": 404,
+        "msg": "workoutTracking.workshop.notFound",
+        "detail": {"msg": "Doesn't exist", "param": "_id","value": "aaaaaaaaaaaaaaaaaaaaaaaa"}
+    }
+    """
+    PostWorkshopFilesValidator(_id=_id)
+    flaskr.create_storage_folder(collection="workshop", _id=_id)
+    files_url = []
+    for file in request.files.getlist('files'):
+        file.save(f'{flaskr.app.config["FILES_STORAGE_PATH"]}workshop/{_id}/{file.filename}')
+        files_url.append(f'workshop/{_id}/{file.filename}')
+    workshop: Workshop = Workshop(_id=_id).add_files(files_url)
+    return flaskr.Response(status=201, msg=f'workoutTracking.{apis.name}.postWorkshopFiles.{Msg.Success.value}',
+                           data=workshop, detail={"files_added": files_url}).sent()
 
 
 @apis.route('/<_id>', methods=['DELETE'])
@@ -147,7 +186,7 @@ def delete_workshop(_id):
         "status": 200,
         "msg": "workoutTracking.workshop.deleteWorkshop.success",
         "data": {"description": "Workshop's description", "id": "61dc2a02dc8493a5f471d2fe",
-                  "media": [], "name": "qaRHR_name1", "category": []}
+                 "files": [], "name": "qaRHR_name1", "categories": []}
     }
 
     @apiErrorExample {json} Error response:
@@ -158,6 +197,7 @@ def delete_workshop(_id):
         "detail": {"msg": "Doesn't exist", "param": "_id","value": "aaaaaaaaaaaaaaaaaaaaaaaa"}
     }
     """
+    DeleteWorkshopValidator(_id=_id)
     workshop: Workshop = Workshop(_id=_id).delete()
     return flaskr.Response(status=200, msg=f'workoutTracking.{apis.name}.deleteWorkshop.{Msg.Success.value}',
                            data=workshop, detail=None).sent()

@@ -1,7 +1,7 @@
 import unittest
 import requests
 
-from tests import Server, WorkshopTest, WorkshopType
+from tests import Server, WorkshopTest, WorkshopCategories
 from tests.test_workshop.PostWorkshop import PostWorkshop, PostWorkshopRepBody
 
 
@@ -43,8 +43,8 @@ class TestPostWorkshop(unittest.TestCase):
         body = {"_id": "qaRHR_id",
                 PostWorkshop.param_name: "qaRHR_name",
                 PostWorkshop.param_description: "qaRHR_description",
-                PostWorkshop.param_category: [WorkshopType.Cardio.value],
-                "media": ["invalid"],
+                PostWorkshop.param_categories: [WorkshopCategories.Cardio.value],
+                "files": ["invalid"],
                 "invalid": "invalid"}
         """ call api """
         url = f'{Server.main_url}/{PostWorkshop.url}'
