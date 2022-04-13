@@ -108,7 +108,7 @@ class TestPostWorkshop(unittest.TestCase):
         self.assertEqual(response_body.data, PostWorkshopRepBody.data_expected(tc_workshop))
         self.assertNotIn("detail", response_body)
         """ check bdd"""
-        tc_workshop.check_exist_by_id()
+        tc_workshop.check_data_by_id()
 
     def test_name_list(self):
         """ name is a list.

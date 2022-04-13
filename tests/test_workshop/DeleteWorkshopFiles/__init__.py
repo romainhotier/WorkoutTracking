@@ -1,21 +1,18 @@
-""" PostWorkshopFiles API """
+""" DeleteWorkshopFiles API """
 import pydantic
 from typing import Optional
 
 from tests import WorkshopTest, Msg, Error
 
 
-class PostWorkshopFiles(object):
+class DeleteWorkshopFiles(object):
     url1 = "workshop"
     url2 = "files"
-    param_id = "_id"
-    msg_success = f'workoutTracking.workshop.postWorkshopFiles.{Msg.Success.value}'
+    msg_success = f'workoutTracking.workshop.deleteWorkshopFiles.{Msg.Success.value}'
     msg_badRequest = f'workoutTracking.workshop.{Msg.BadRequest.value}'
-    msg_notFound = f'workoutTracking.workshop.{Msg.NotFound.value}'
-    msg_notAllowed_root = f'workoutTracking.{Msg.NotAllowed.value}'
 
 
-class PostWorkshopFilesRepBody(pydantic.BaseModel):
+class DeleteWorkshopFilesRepBody(pydantic.BaseModel):
 
     status: int
     msg: str
@@ -28,7 +25,7 @@ class PostWorkshopFilesRepBody(pydantic.BaseModel):
 
     @staticmethod
     def detail_expected_success(_id: str, files: list):
-        return {'files_added': [f'workshop/{_id}/{file.name}' for file in files]}
+        return {'files_deleted': [f'workshop/{_id}/{file.name}' for file in files]}
 
     @staticmethod
     def detail_expected_error(**error):

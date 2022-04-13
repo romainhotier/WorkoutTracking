@@ -53,7 +53,7 @@ class TestGetAllWorkshop(unittest.TestCase):
         self.assertNotIn("data", response_body)
         self.assertEqual(response_body.detail,
                          GetAllWorkshopRepBody.detail_expected(param=GetAllWorkshop.param_categories,
-                                                               msg=ErrorMsg.MustBeInWorkShopCategory.value,
+                                                               msg=ErrorMsg.MustBeInWorkshopCategories.value,
                                                                value=[""]))
 
     def test_category_string(self):

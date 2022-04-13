@@ -37,8 +37,10 @@ class TestPostWorkshopFiles(unittest.TestCase):
         self.assertEqual(response_body.detail,
                          PostWorkshopFilesRepBody.detail_expected_success(_id=tc_id, files=[tc_file1, tc_file2]))
         """ check bdd """
-        tc_file1.check_file_storage()
-        tc_file2.check_file_storage()
+        tc_workshop.check_data_by_id()
+        """ check storage """
+        tc_file1.check_file_storage(exist=True)
+        tc_file2.check_file_storage(exist=True)
 
     @classmethod
     def tearDownClass(cls):

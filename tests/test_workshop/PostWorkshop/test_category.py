@@ -10,7 +10,7 @@ class TestPostWorkshop(unittest.TestCase):
     def setUp(self):
         WorkshopTest().clean()
 
-    def type_category_without(self):
+    def test_category_without(self):
         """ Without category.
 
         Return
@@ -24,16 +24,16 @@ class TestPostWorkshop(unittest.TestCase):
         response_body = PostWorkshopRepBody(**response.json())
         tc_workshop: WorkshopTest = PostWorkshop().workshop_set_from_body(body).set_id(response_body.get_id())
         """ assert """
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 201)
         self.assertEqual(response.headers["Content-Type"], "application/json")
-        self.assertEqual(response_body.status, 200)
+        self.assertEqual(response_body.status, 201)
         self.assertEqual(response_body.msg, PostWorkshop.msg_success)
         self.assertEqual(response_body.data, PostWorkshopRepBody.data_expected(tc_workshop))
         self.assertNotIn("detail", response_body)
         """ check bdd"""
-        tc_workshop.check_exist_by_id()
+        tc_workshop.check_data_by_id()
 
-    def type_category_null(self):
+    def test_category_null(self):
         """ category is None.
 
         Return
@@ -60,7 +60,7 @@ class TestPostWorkshop(unittest.TestCase):
         """ check bdd"""
         self.assertEqual(count_before, WorkshopTest().count())
 
-    def type_category_string_empty(self):
+    def test_category_string_empty(self):
         """ category is an empty string.
 
         Return
@@ -87,7 +87,7 @@ class TestPostWorkshop(unittest.TestCase):
         """ check bdd"""
         self.assertEqual(count_before, WorkshopTest().count())
 
-    def type_category_string(self):
+    def test_category_string(self):
         """ category is a string.
 
         Return
@@ -114,7 +114,7 @@ class TestPostWorkshop(unittest.TestCase):
         """ check bdd"""
         self.assertEqual(count_before, WorkshopTest().count())
 
-    def type_category_list_empty(self):
+    def test_category_list_empty(self):
         """ category is an empty list.
 
         Return
@@ -129,16 +129,16 @@ class TestPostWorkshop(unittest.TestCase):
         response_body = PostWorkshopRepBody(**response.json())
         tc_workshop: WorkshopTest = PostWorkshop().workshop_set_from_body(body).set_id(response_body.get_id())
         """ assert """
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 201)
         self.assertEqual(response.headers["Content-Type"], "application/json")
-        self.assertEqual(response_body.status, 200)
+        self.assertEqual(response_body.status, 201)
         self.assertEqual(response_body.msg, PostWorkshop.msg_success)
         self.assertEqual(response_body.data, PostWorkshopRepBody.data_expected(tc_workshop))
         self.assertNotIn("detail", response_body)
         """ check bdd"""
-        tc_workshop.check_exist_by_id()
+        tc_workshop.check_data_by_id()
 
-    def type_category_list_invalid(self):
+    def test_category_list_invalid(self):
         """ category is an invalid list.
 
         Return
@@ -165,11 +165,11 @@ class TestPostWorkshop(unittest.TestCase):
         """ check bdd"""
         self.assertEqual(count_before, WorkshopTest().count())
 
-    def type_category_list_valid(self):
+    def test_category_list_valid(self):
         """ category is a valid list.
 
         Return
-            200 - Workshop Created.
+            201 - Workshop Created.
         """
         """ env """
         body = {PostWorkshop.param_name: "qaRHR_workshopName",
@@ -180,16 +180,16 @@ class TestPostWorkshop(unittest.TestCase):
         response_body = PostWorkshopRepBody(**response.json())
         tc_workshop: WorkshopTest = PostWorkshop().workshop_set_from_body(body).set_id(response_body.get_id())
         """ assert """
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 201)
         self.assertEqual(response.headers["Content-Type"], "application/json")
-        self.assertEqual(response_body.status, 200)
+        self.assertEqual(response_body.status, 201)
         self.assertEqual(response_body.msg, PostWorkshop.msg_success)
         self.assertEqual(response_body.data, PostWorkshopRepBody.data_expected(tc_workshop))
         self.assertNotIn("detail", response_body)
         """ check bdd"""
-        tc_workshop.check_exist_by_id()
+        tc_workshop.check_data_by_id()
 
-    def type_category_dict(self):
+    def test_category_dict(self):
         """ category is a dict.
 
         Return

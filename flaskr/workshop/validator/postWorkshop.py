@@ -59,7 +59,7 @@ class PostWorkshopValidator(pydantic.BaseModel):
             if key not in WorkshopCategories.list():
                 return abort(status=400,
                              description=flaskr.Error(param="categories", value=value,
-                                                      msg=ErrorMsg.MustBeInWorkShopCategory.value))
+                                                      msg=ErrorMsg.MustBeInWorkshopCategories.value))
         return value
 
     @staticmethod

@@ -33,7 +33,7 @@ class TestDeleteWorkshop(unittest.TestCase):
         self.assertNotIn("detail", response_body)
         """ check bdd"""
         tc_workshop1.check_doesnt_exist_by_id()
-        tc_workshop2.check_exist_by_id()
+        tc_workshop2.check_data_by_id()
 
     @classmethod
     def tearDownClass(cls):

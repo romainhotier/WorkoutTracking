@@ -44,5 +44,5 @@ class GetAllWorkshopValidator(pydantic.BaseModel):
         """ Type must be a WorkshopCategories enum. """
         if not set(values).issubset(WorkshopCategories.list()):
             return abort(status=400, description=flaskr.Error(param="categories", value=values,
-                                                              msg=ErrorMsg.MustBeInWorkShopCategory.value))
+                                                              msg=ErrorMsg.MustBeInWorkshopCategories.value))
         return values

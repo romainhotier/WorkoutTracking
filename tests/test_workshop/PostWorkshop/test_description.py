@@ -31,7 +31,7 @@ class TestPostWorkshop(unittest.TestCase):
         self.assertEqual(response_body.data, PostWorkshopRepBody.data_expected(tc_workshop))
         self.assertNotIn("detail", response_body)
         """ check bdd"""
-        tc_workshop.check_exist_by_id()
+        tc_workshop.check_data_by_id()
 
     def test_description_null(self):
         """ description is None.
@@ -109,7 +109,7 @@ class TestPostWorkshop(unittest.TestCase):
         self.assertEqual(response_body.data, PostWorkshopRepBody.data_expected(tc_workshop))
         self.assertNotIn("detail", response_body)
         """ check bdd"""
-        tc_workshop.check_exist_by_id()
+        tc_workshop.check_data_by_id()
 
     def test_description_list(self):
         """ description is a list.

@@ -32,8 +32,8 @@ class TestDeleteWorkshop(unittest.TestCase):
         self.assertNotIn("data", response_body)
         self.assertEqual(response_body.detail, ErrorMsg.MethodIsNotAllowed.value)
         """ check bdd"""
-        tc_workshop1.check_exist_by_id()
-        tc_workshop2.check_exist_by_id()
+        tc_workshop1.check_data_by_id()
+        tc_workshop2.check_data_by_id()
 
     def test_id_string_invalid(self):
         """ _id is an invalid string.
@@ -60,8 +60,8 @@ class TestDeleteWorkshop(unittest.TestCase):
                                                                msg=ErrorMsg.MustBeAnObjectId.value,
                                                                value=tc_id))
         """ check bdd"""
-        tc_workshop1.check_exist_by_id()
-        tc_workshop2.check_exist_by_id()
+        tc_workshop1.check_data_by_id()
+        tc_workshop2.check_data_by_id()
 
     def test_id_objectId_invalid(self):
         """ _id is an invalid ObjectId.
@@ -88,8 +88,8 @@ class TestDeleteWorkshop(unittest.TestCase):
                                                                msg=ErrorMsg.DoesntExist.value,
                                                                value=tc_id))
         """ check bdd"""
-        tc_workshop1.check_exist_by_id()
-        tc_workshop2.check_exist_by_id()
+        tc_workshop1.check_data_by_id()
+        tc_workshop2.check_data_by_id()
 
     @classmethod
     def tearDownClass(cls):

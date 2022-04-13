@@ -15,7 +15,7 @@ from flask_pymongo import PyMongo
 from pymongo import errors
 
 from flaskr.database import mongo
-from flaskr.enum import Msg
+from flaskr.enum import RunMode, Msg
 import flaskr.workshop.router as workshop_router
 
 
@@ -60,13 +60,13 @@ class Error(pydantic.BaseModel):
 
 # Cmd Line
 def get_options_from_command_line(args):
-    """ Catch command line options.
+    """ Catch command line options. Prod by Default
 
     Parameters
     ----------
     args: list
         All arguments in the command line.
-        1st can be ["test", "dev", "prod"].
+        1st can be ["dev", "prod"].
 
     Returns
     -------
@@ -74,18 +74,16 @@ def get_options_from_command_line(args):
         Set env / debug / testing to update server config.
     """
     try:
-        mode = args[1]
-        match mode:
-            case "test":
-                return {"env": "development", "debug": True, "testing": True}
-            case "dev":
-                return {"env": "development", "debug": True, "testing": False}
-            case "prod":
-                return {"env": "production", "debug": False, "testing": False}
+        run_mode = args[1]
+        match run_mode:
+            case RunMode.Dev.value:
+                return {"run_mode": run_mode, "env": "development", "debug": True, "testing": True}
+            case RunMode.Prod.value:
+                return {"run_mode": run_mode, "env": "production", "debug": False, "testing": False}
             case _:
-                return {"env": "production", "debug": False, "testing": False}
+                return {"run_mode": RunMode.Prod.value, "env": "production", "debug": False, "testing": False}
     except IndexError:
-        return {"env": "production", "debug": False, "testing": False}
+        return {"run_mode": RunMode.Prod.value, "env": "production", "debug": False, "testing": False}
 
 
 # Check MongoDB is Up
@@ -170,6 +168,7 @@ app.config["ENV"] = "production"
 app.config["JWT_SECRET_KEY"] = "super-secret-workoutTracking"
 app.config["EXPIRATION_TOKEN"] = 5
 app.config["MONGO_URI"] = "mongodb://127.0.0.1:27017/workoutTracking"
+app.config["RUN_MODE"] = ""
 paths = get_storage_path()
 app.config["FILES_STORAGE_PATH"] = paths[0]
 app.config["FILES_TESTS_ORIGIN_PATH"] = paths[1]

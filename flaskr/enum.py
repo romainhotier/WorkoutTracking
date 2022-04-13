@@ -2,6 +2,12 @@
 from enum import Enum
 
 
+class RunMode(Enum):
+    """ Used in sys.arg launch cmd line """
+    Dev = "dev"
+    Prod = "prod"
+
+
 class Msg(Enum):
     """ Used in Response.msg """
     Success = "success"
@@ -19,4 +25,4 @@ class ErrorMsg(Enum):
     MustBeAString = "Must be a String"
     MustBeAStringNotEmpty = "Must be a String not empty"
     MustBeAList = "Must be a List"
-    MustBeInWorkShopCategory = "Must be in ['cardio', 'fitness', 'strength']"
+    MustBeInWorkshopCategories = "Must be in ['cardio', 'fitness', 'strength']"

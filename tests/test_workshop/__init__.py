@@ -61,6 +61,10 @@ class WorkshopTest(Workshop):
         """ Check a WorkshopTest doesn't exist by name. """
         assert mongo.db.workshop.find_one({"name": self.name}) is None
 
+    def check_data_by_id(self):
+        """ Check WorkshopTest's data from Mongo by _id. """
+        assert self == WorkshopTest(**mongo.db.workshop.find_one({"_id": ObjectId(self.id)})).set_id(self.id)
+
     @staticmethod
     def count():
         """ Count Workshop in bdd. """
