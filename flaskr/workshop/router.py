@@ -158,7 +158,7 @@ def post_workshop_files(_id):
     }
     """
     PostWorkshopFilesValidator(_id=_id)
-    flaskr.create_storage_folder(collection="workshop", _id=_id)
+    flaskr.create_storage_folder(parent=f'workshop/{_id}')
     files_url = []
     for file in request.files.getlist('files'):
         file.save(f'{flaskr.app.config["FILES_STORAGE_PATH"]}workshop/{_id}/{file.filename}')
@@ -171,15 +171,15 @@ def post_workshop_files(_id):
 @apis.route('/<_id>/files', methods=['DELETE'])
 def delete_workshop_files(_id):
     """
-    @api {delete} /workshop/<_id>/files?filename[x]=<filename>  DeleteWorkshopFiles
+    @api {delete} /workshop/<_id>/files?filenames[x]=<filename>  DeleteWorkshopFiles
     @apiGroup Workshop
     @apiDescription Delete files to a workshop
 
     @apiParam (Query param) {String} _id Workshop's ObjectId
-    @apiParam (Query param) {Array} filename File's name to be deleted.
+    @apiParam (Query param) {Array} filenames[] File's name to be deleted.
 
     @apiExample {json} Example usage:
-    DELETE http://127.0.0.1:5000/workshop/<_id>/files?filename[0]=<filename>
+    DELETE http://127.0.0.1:5000/workshop/<_id>/files?filenames[]=<filename1>&filenames[]=<filename2>
 
     @apiSuccessExample {json} Success response:
     HTTPS 200
@@ -199,16 +199,14 @@ def delete_workshop_files(_id):
         "detail": {"msg": "Doesn't exist", "param": "_id","value": "aaaaaaaaaaaaaaaaaaaaaaaa"}
     }
     """
-    DeleteWorkshopFilesValidator(_id=_id)
-    #with_calories = request.args.get(api.param_with_calories)
-
-    #flaskr.create_storage_folder(collection="workshop", _id=_id)
-    #files_url = []
-    #for file in request.files.getlist('files'):
-    #    file.save(f'{flaskr.app.config["FILES_STORAGE_PATH"]}workshop/{_id}/{file.filename}')
-    #    files_url.append(f'workshop/{_id}/{file.filename}')
-    #workshop: Workshop = Workshop(_id=_id).add_files(files_url)
-    #return flaskr.Response(status=201, msg=f'workoutTracking.{apis.name}.postWorkshopFiles.{Msg.Success.value}', data=workshop, detail={"files_added": files_url}).sent()
+    filenames: list = request.args.getlist("filenames[]")
+    DeleteWorkshopFilesValidator(_id=_id, filenames=filenames).check_files_exist()
+    for filename in filenames:
+        flaskr.delete_file(filepath=f'{flaskr.app.config["FILES_STORAGE_PATH"]}workshop/{_id}/{filename}')
+    deleted_files: list = [f'workshop/{_id}/{filename}' for filename in filenames]
+    workshop: Workshop = Workshop(_id=_id).delete_files(deleted_files)
+    return flaskr.Response(status=200, msg=f'workoutTracking.{apis.name}.deleteWorkshopFiles.{Msg.Success.value}',
+                           data=workshop, detail={"files_deleted": deleted_files}).sent()
 
 
 @apis.route('/<_id>', methods=['DELETE'])

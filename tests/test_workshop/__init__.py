@@ -34,7 +34,18 @@ class WorkshopTest(Workshop):
         return self
 
     def add_files(self, files: list):
-        self.files = self.files + [f'workshop/{self.id}/{file.name}' for file in files]
+        self.files = self.files + [f'{file.parent}/{file.name}' for file in files]
+        return self
+
+    def add_files_in_mongo(self, files: list):
+        self.files = self.files + [f'{file.parent}/{file.name}' for file in files]
+        for file in files:
+            mongo.db.workshop.update_one({"_id": ObjectId(self.id)}, {'$push': {"files": f'{file.parent}/{file.name}'}})
+        return self
+
+    def delete_files(self, files: list):
+        for file in files:
+            self.files.remove(f'{file.parent}/{file.name}')
         return self
 
     def insert(self):

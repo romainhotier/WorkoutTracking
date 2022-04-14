@@ -25,4 +25,5 @@ class ErrorMsg(Enum):
     MustBeAString = "Must be a String"
     MustBeAStringNotEmpty = "Must be a String not empty"
     MustBeAList = "Must be a List"
+    MustBeAListOfStringNotEmpty = "Must be a List of String not empty"
     MustBeInWorkshopCategories = "Must be in ['cardio', 'fitness', 'strength']"

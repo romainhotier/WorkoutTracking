@@ -93,7 +93,7 @@ def check_mongodb_up():
     Returns
     -------
     Any
-    Close app if there is no connection.
+        Close app if there is no connection.
     """
     try:
         mongo_client = PyMongo(app, serverSelectionTimeoutMS=2000).cx
@@ -108,6 +108,13 @@ def check_mongodb_up():
 
 # Files management
 def get_storage_path():
+    """ Set both FILES_STORAGE_PATH and FILES_TESTS_ORIGIN_PATH from platform used
+
+    Returns
+    -------
+    tuple
+        FILES_STORAGE_PATH, FILES_TESTS_ORIGIN_PATH.
+    """
     system = platform.system()
     usr = os.getlogin()
     if usr == "rhr" and system == "Linux":  # Desktop pc for dev
@@ -141,17 +148,35 @@ def create_root_storage_folders():
             pass
 
 
-def create_storage_folder(collection, _id):
+def create_storage_folder(parent: str):
     """ Catch command line options.
 
     Parameters
     ----------
-    collection: collection's item.
-    _id: ObjectId's item.
+    parent: collection/_id's item.
     """
     try:
-        os.mkdir(f'{app.config["FILES_STORAGE_PATH"]}/{collection}/{_id}')
+        os.mkdir(f'{app.config["FILES_STORAGE_PATH"]}/{parent}')
     except (FileExistsError, OSError):
+        pass
+
+
+def check_file_exist(path: str):
+    """ Check if file exist
+
+    Returns
+    -------
+    bool
+        If path exist.
+    """
+    return os.path.exists(path)
+
+
+def delete_file(filepath: str):
+    """ Delete file """
+    try:
+        os.remove(filepath)
+    except OSError:
         pass
 
 

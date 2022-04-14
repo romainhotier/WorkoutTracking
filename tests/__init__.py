@@ -1,8 +1,10 @@
 """ Server information """
 import os
+import shutil
 import glob
 import pydantic
 
+import flaskr
 from flaskr import app
 from flaskr.database import mongo  # use for test model
 from flaskr import Error  # usr for api model
@@ -55,5 +57,14 @@ class File(object):
     def check_file_storage(self, exist: bool):
         assert os.path.exists(self.storage_path) is exist
 
+    def create(self):
+        flaskr.create_storage_folder(parent=self.parent)
+        try:
+            shutil.copyfile(self.origin_path, self.storage_path)
+            return self
+        except (FileExistsError, OSError):
+            pass
+
 
 Server = Server()
+flaskr.create_root_storage_folders()

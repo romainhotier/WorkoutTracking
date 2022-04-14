@@ -19,28 +19,62 @@ class TestDeleteWorkshopFiles(unittest.TestCase):
         """ env """
         tc_workshop = WorkshopTest().insert()
         tc_id = tc_workshop.id
-        tc_file1 = File(name="qaRHR_text.txt", parent=f'workshop/{tc_id}')
-        tc_file2 = File(name="qaRHR_image.png", parent=f'workshop/{tc_id}')
-        tc_files = [('files', open(tc_file1.origin_path, 'rb')),
-                    ('files', open(tc_file2.origin_path, 'rb'))]
+        tc_file1 = File(name="qaRHR_text.txt", parent=f'workshop/{tc_id}').create()
+        tc_file2 = File(name="qaRHR_image.png", parent=f'workshop/{tc_id}').create()
+        tc_workshop.add_files_in_mongo(files=[tc_file1, tc_file2])
         """ call api """
-        url = f'{Server.main_url}/{DeleteWorkshopFiles.url1}/{tc_id}/{DeleteWorkshopFiles.url2}'
-        response = requests.post(url, files=tc_files, verify=False)
+        url = f'{Server.main_url}/{DeleteWorkshopFiles.url1}/{tc_id}/{DeleteWorkshopFiles.url2}?' \
+              f'{DeleteWorkshopFiles.param_filenames}[]={tc_file1.name}&' \
+              f'invalid=invalid'
+        response = requests.delete(url, verify=False)
         response_body = DeleteWorkshopFilesRepBody(**response.json())
-        #tc_workshop.add_files(files=[tc_file1, tc_file2])
+        tc_workshop.delete_files(files=[tc_file1])
         """ assert """
-        #self.assertEqual(response.status_code, 201)
-        #self.assertEqual(response.headers["Content-Type"], "application/json")
-        #self.assertEqual(response_body.status, 201)
-        #self.assertEqual(response_body.msg, PostWorkshopFiles.msg_success)
-        #self.assertEqual(response_body.data, PostWorkshopFilesRepBody.data_expected(tc_workshop))
-        #self.assertEqual(response_body.detail,
-        #                 PostWorkshopFilesRepBody.detail_expected_success(_id=tc_id, files=[tc_file1, tc_file2]))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers["Content-Type"], "application/json")
+        self.assertEqual(response_body.status, 200)
+        self.assertEqual(response_body.msg, DeleteWorkshopFiles.msg_success)
+        self.assertEqual(response_body.data, DeleteWorkshopFilesRepBody.data_expected(tc_workshop))
+        self.assertEqual(response_body.detail,
+                         DeleteWorkshopFilesRepBody.detail_expected_success(files=[tc_file1]))
         """ check bdd """
-        #tc_workshop.check_data_by_id()
+        tc_workshop.check_data_by_id()
         """ check storage """
-        #tc_file1.check_file_storage(exist=True)
-        #tc_file2.check_file_storage(exist=True)
+        tc_file1.check_file_storage(exist=False)
+        tc_file2.check_file_storage(exist=True)
+
+    def test_api_ok_multi(self):
+        """ Default case multi files.
+
+        Return
+            200 - Files Workshop Delete.
+        """
+        """ env """
+        tc_workshop = WorkshopTest().insert()
+        tc_id = tc_workshop.id
+        tc_file1 = File(name="qaRHR_text.txt", parent=f'workshop/{tc_id}').create()
+        tc_file2 = File(name="qaRHR_image.png", parent=f'workshop/{tc_id}').create()
+        tc_workshop.add_files_in_mongo(files=[tc_file1, tc_file2])
+        """ call api """
+        url = f'{Server.main_url}/{DeleteWorkshopFiles.url1}/{tc_id}/{DeleteWorkshopFiles.url2}?' \
+              f'{DeleteWorkshopFiles.param_filenames}[]={tc_file1.name}&' \
+              f'{DeleteWorkshopFiles.param_filenames}[]={tc_file2.name}'
+        response = requests.delete(url, verify=False)
+        response_body = DeleteWorkshopFilesRepBody(**response.json())
+        tc_workshop.delete_files(files=[tc_file1, tc_file2])
+        """ assert """
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers["Content-Type"], "application/json")
+        self.assertEqual(response_body.status, 200)
+        self.assertEqual(response_body.msg, DeleteWorkshopFiles.msg_success)
+        self.assertEqual(response_body.data, DeleteWorkshopFilesRepBody.data_expected(tc_workshop))
+        self.assertEqual(response_body.detail,
+                         DeleteWorkshopFilesRepBody.detail_expected_success(files=[tc_file1, tc_file2]))
+        """ check bdd """
+        tc_workshop.check_data_by_id()
+        """ check storage """
+        tc_file1.check_file_storage(exist=False)
+        tc_file2.check_file_storage(exist=False)
 
     @classmethod
     def tearDownClass(cls):

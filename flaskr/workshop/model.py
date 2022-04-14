@@ -94,6 +94,13 @@ class Workshop(pydantic.BaseModel):
         item = mongo.db.workshop.find_one({"_id": ObjectId(self.id)})
         return Workshop(**item)
 
+    def delete_files(self, files: list):
+        """ Delete files url to a Workshop """
+        for file in files:
+            mongo.db.workshop.update_one({"_id": ObjectId(self.id)}, {'$pull': {"files": file}})
+        item = mongo.db.workshop.find_one({"_id": ObjectId(self.id)})
+        return Workshop(**item)
+
     def delete(self):
         """ Delete a Workshop and return it. """
         item = mongo.db.workshop.find_one({"_id": ObjectId(self.id)})
