@@ -1,24 +1,52 @@
-""" PostWorkshop Validator """
+""" UpdateWorkshop Validator """
 import pydantic
 from typing import Optional
+from bson import ObjectId
 
 from flask import abort
 
 import flaskr
+from flaskr.database import mongo
 from flaskr.enum import ErrorMsg
 from flaskr.workshop import WorkshopCategories
 
 
-class PostWorkshopBodyValidator(pydantic.BaseModel):
+class UpdateWorkshopValidator(pydantic.BaseModel):
 
-    """ PostWorkshop Validator.
+    """ UpdateWorkshop Validator.
+    - _id: str = Workshop's ObjectId.
+    """
+    id: Optional[object] = pydantic.Field(alias='_id')
+
+    @pydantic.validator("id")
+    @classmethod
+    def id_validator(cls, value):
+        """ Check Id is correct and exist """
+        if isinstance(value, str):
+            if len(value) == 24:
+                item = mongo.db.workshop.find_one({"_id": ObjectId(value)})
+                if item is None:
+                    return abort(status=404,
+                                 description=flaskr.Error(param="_id", msg=ErrorMsg.DoesntExist.value, value=value))
+                return value
+            else:
+                return abort(status=400,
+                             description=flaskr.Error(param="_id", value=value, msg=ErrorMsg.MustBeAnObjectId.value))
+        else:
+            return abort(status=400,
+                         description=flaskr.Error(param="_id", value=value, msg=ErrorMsg.MustBeAnObjectId.value))
+
+
+class UpdateWorkshopBodyValidator(pydantic.BaseModel):
+
+    """ UpdateWorkshop Validator.
     - name: str = Workshop's Name.
     - description: str = Workshop's description.
     - categories = list[str] Workshop's category in ['cardio', 'fitness', 'strength'].
     """
-    name: object
-    description: Optional[object] = "Workshop's description"
-    categories: Optional[object] = []
+    name: Optional[object]
+    description: Optional[object]
+    categories: Optional[object]
 
     @pydantic.validator("name")
     @classmethod
@@ -61,9 +89,3 @@ class PostWorkshopBodyValidator(pydantic.BaseModel):
                              description=flaskr.Error(param="categories", value=value,
                                                       msg=ErrorMsg.MustBeInWorkshopCategories.value))
         return value
-
-    @staticmethod
-    def check_mandatory_fields(data):
-        if "name" not in data:
-            return abort(status=400,
-                         description=flaskr.Error(param="name", msg=ErrorMsg.IsRequired.value))

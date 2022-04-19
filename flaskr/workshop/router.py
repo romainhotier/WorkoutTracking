@@ -3,8 +3,7 @@ from flask import Blueprint, request
 
 import flaskr
 from flaskr.enum import Msg
-from flaskr.workshop import Workshop, DeleteWorkshopValidator, DeleteWorkshopFilesValidator, \
-    GetAllWorkshopValidator, GetWorkshopValidator, PostWorkshopValidator, PostWorkshopFilesValidator
+from flaskr.workshop import Workshop, validator as validator
 
 apis = Blueprint('workshop', __name__, url_prefix='/workshop')
 
@@ -39,7 +38,7 @@ def get_all_workshop():
     if not args:
         workshops: list[Workshop] = Workshop().select_all()
     else:
-        args_validated = GetAllWorkshopValidator(**args).dict(exclude_none=True)
+        args_validated = validator.GetAllWorkshopValidator(**args).dict(exclude_none=True)
         workshops: list[Workshop] = Workshop().select_all_by(args_validated)
     return flaskr.Response(status=200, msg=f'workoutTracking.{apis.name}.getAllWorkshop.{Msg.Success.value}',
                            data=workshops, detail=None).sent()
@@ -74,7 +73,7 @@ def get_workshop(_id):
         "detail": {"msg": "Doesn't exist", "param": "_id","value": "aaaaaaaaaaaaaaaaaaaaaaaa"}
     }
     """
-    GetWorkshopValidator(_id=_id)
+    validator.GetWorkshopValidator(_id=_id)
     workshop: Workshop = Workshop(_id=_id).select_one_by_id()
     return flaskr.Response(status=200, msg=f'workoutTracking.{apis.name}.getWorkshop.{Msg.Success.value}',
                            data=workshop, detail=None).sent()
@@ -117,8 +116,8 @@ def post_workshop():
     }
     """
     data = request.json
-    PostWorkshopValidator().check_mandatory_fields(data)
-    data_validated = PostWorkshopValidator(**data).dict()
+    validator.PostWorkshopBodyValidator().check_mandatory_fields(data)
+    data_validated = validator.PostWorkshopBodyValidator(**data).dict()
     workshop: Workshop = Workshop(**data_validated).insert()
     return flaskr.Response(status=201, msg=f'workoutTracking.{apis.name}.postWorkshop.{Msg.Success.value}',
                            data=workshop, detail=None).sent()
@@ -157,7 +156,7 @@ def post_workshop_files(_id):
         "detail": {"msg": "Doesn't exist", "param": "_id","value": "aaaaaaaaaaaaaaaaaaaaaaaa"}
     }
     """
-    PostWorkshopFilesValidator(_id=_id)
+    validator.PostWorkshopFilesValidator(_id=_id)
     flaskr.create_storage_folder(parent=f'workshop/{_id}')
     files_url = []
     for file in request.files.getlist('files'):
@@ -200,7 +199,7 @@ def delete_workshop_files(_id):
     }
     """
     filenames: list = request.args.getlist("filenames[]")
-    DeleteWorkshopFilesValidator(_id=_id, filenames=filenames).check_files_exist()
+    validator.DeleteWorkshopFilesValidator(_id=_id, filenames=filenames).check_files_exist()
     for filename in filenames:
         flaskr.delete_file(filepath=f'{flaskr.app.config["FILES_STORAGE_PATH"]}workshop/{_id}/{filename}')
     deleted_files: list = [f'workshop/{_id}/{filename}' for filename in filenames]
@@ -238,9 +237,48 @@ def delete_workshop(_id):
         "detail": {"msg": "Doesn't exist", "param": "_id","value": "aaaaaaaaaaaaaaaaaaaaaaaa"}
     }
     """
-    DeleteWorkshopValidator(_id=_id)
+    validator.DeleteWorkshopValidator(_id=_id)
     workshop: Workshop = Workshop(_id=_id).delete()
     return flaskr.Response(status=200, msg=f'workoutTracking.{apis.name}.deleteWorkshop.{Msg.Success.value}',
+                           data=workshop, detail=None).sent()
+
+
+@apis.route('/<_id>', methods=['PUT'])
+def update_workshop(_id):
+    """
+    @api {put} /workshop/<_id>  UpdateWorkshop
+    @apiGroup Workshop
+    @apiDescription Update a Workshop by it's ObjectId
+
+    @apiParam (Body param) {String} [name] Workshop's name
+    @apiParam (Body param) {String} [description] Workshop's description
+    @apiParam (Body param) {Array} [categories] Workshop's categories in ['cardio', 'fitness', 'strength']
+
+    @apiExample {json} Example usage:
+    DELETE http://127.0.0.1:5000/workshop/<_id>
+
+    @apiSuccessExample {json} Success response:
+    HTTPS 200
+    {
+        "status": 200,
+        "msg": "workoutTracking.workshop.deleteWorkshop.success",
+        "data": {"description": "Workshop's description updated", "id": "61dc2a02dc8493a5f471d2fe",
+                 "files": [], "name": "qaRHR_name1", "categories": ["cardio"]}
+    }
+
+    @apiErrorExample {json} Error response:
+    HTTPS 400
+    {
+        "status": 404,
+        "msg": "workoutTracking.workshop.notFound",
+        "detail": {"msg": "Doesn't exist", "param": "_id","value": "aaaaaaaaaaaaaaaaaaaaaaaa"}
+    }
+    """
+    validator.UpdateWorkshopValidator(_id=_id)
+    data = request.json
+    data_validated = validator.UpdateWorkshopBodyValidator(**data).dict()
+    workshop: Workshop = Workshop(_id=_id).update(data=data_validated)
+    return flaskr.Response(status=200, msg=f'workoutTracking.{apis.name}.updateWorkshop.{Msg.Success.value}',
                            data=workshop, detail=None).sent()
 
 
